@@ -14,6 +14,7 @@ const app = express();
 
 // ✅ CORS CONFIG (Netlify + Localhost)
 const allowedOrigins = [
+  "http://localhost",
   "http://localhost:3000",
   "https://trello-clone18.netlify.app"
 ];

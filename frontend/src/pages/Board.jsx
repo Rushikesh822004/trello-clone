@@ -88,29 +88,88 @@ export default function Board() {
 
   // ✅ FIXED: API PATH + TOKEN
   const onDragEnd = async (result) => {
-    if (!result.destination) return;
+  const { source, destination, draggableId } = result;
 
-    try {
-      await API.put(
-        `/tasks/${result.draggableId}`,
-        {
-          status: result.destination.droppableId,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  if (!destination) return;
 
-      fetchTasks();
-    } catch (error) {
-      console.error("Error updating task:", error);
-    }
-  };
+  if (
+    source.droppableId === destination.droppableId &&
+    source.index === destination.index
+  ) {
+    return;
+  }
 
-  const getTasks = (status) =>
-    tasks.filter((t) => t.status === status);
+  // Clone current tasks
+  const updatedTasks = [...tasks];
+
+  // Find dragged task
+  const draggedTask = updatedTasks.find(
+    (task) => task._id === draggableId
+  );
+
+  if (!draggedTask) return;
+
+  // Remove dragged task
+  const remainingTasks = updatedTasks.filter(
+    (task) => task._id !== draggableId
+  );
+
+  // Update status if moved to another column
+  draggedTask.status = destination.droppableId;
+
+  // Tasks in destination column
+  const destinationTasks = remainingTasks
+    .filter((task) => task.status === destination.droppableId)
+    .sort((a, b) => a.order - b.order);
+
+  // Insert at dropped position
+  destinationTasks.splice(destination.index, 0, draggedTask);
+
+  // Recalculate order
+  destinationTasks.forEach((task, index) => {
+    task.order = index + 1;
+  });
+
+  // Merge all tasks
+  const finalTasks = [
+    ...remainingTasks.filter(
+      (task) => task.status !== destination.droppableId
+    ),
+    ...destinationTasks,
+  ];
+
+  // Instant UI update
+  setTasks(finalTasks);
+
+  try {
+    await API.put(
+  "/tasks/reorder/all",
+  {
+    tasks: finalTasks.map((task) => ({
+      _id: task._id,
+      status: task.status,
+      order: task.order,
+    })),
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+  } catch (err) {
+    console.error(err);
+
+    // Rollback if API fails
+    fetchTasks();
+  }
+};
+
+  const getTasks = (status) => {
+  return tasks
+    .filter((task) => task.status === status)
+    .sort((a, b) => a.order - b.order);
+};
 
   return (
     <div

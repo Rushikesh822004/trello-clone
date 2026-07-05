@@ -17,10 +17,18 @@ export default function Register() {
       });
       alert("Registered successfully!");
       navigate("/");
-    } catch (err) {
-      console.error(err);
-      alert("Registration failed");
-    }
+    } 
+    catch (err) {
+  console.error(err);
+
+  console.log("Error Response:", err.response);
+
+  alert(
+    err.response?.data?.message ||
+    err.message ||
+    "Registration failed"
+  );
+  }
   };
 
   return (

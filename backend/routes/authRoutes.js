@@ -6,14 +6,23 @@ import jwt from "jsonwebtoken";
 const router = express.Router();
 
 // Register
-router.post("/register", async (req, res) => {
+ router.post("/register", async (req, res) => {
+
+  console.log("========== REGISTER ==========");
+  console.log(req.body);
+
   try {
+
     const { email, password } = req.body;
 
     const existingUser = await User.findOne({ email });
 
+    console.log("Existing User:", existingUser);
+
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        message: "User already exists",
+      });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -25,11 +34,22 @@ router.post("/register", async (req, res) => {
 
     await user.save();
 
-    res.json({ message: "User registered successfully" });
+    console.log("User Saved");
+
+    res.json({
+      message: "User registered successfully",
+    });
 
   } catch (error) {
-    res.status(500).json({ message: "Server error" });
+
+    console.error(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+
   }
+
 });
 
 // Login
