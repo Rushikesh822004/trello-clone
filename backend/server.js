@@ -16,21 +16,22 @@ const app = express();
 const allowedOrigins = [
   "http://localhost",
   "http://localhost:3000",
+  "http://13.63.159.167",
+  "https://13.63.159.167",
   "https://trello-clone18.netlify.app"
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman
+  origin(origin, callback) {
+    if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
-    } else {
-      return callback(new Error("CORS not allowed"));
     }
+
+    callback(new Error("CORS not allowed"));
   },
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
+  credentials: true,
 }));
 
 // ✅ Middleware
