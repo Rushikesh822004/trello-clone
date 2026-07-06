@@ -32,7 +32,7 @@ export default function Login() {
         <div className="bg-gray-900 rounded-2xl p-8 w-80">
 
           <h2 className="text-white text-2xl font-bold mb-6">
-            Login
+            Login - CI/CD Test
           </h2>
 
           <input
