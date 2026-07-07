@@ -7,11 +7,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes.js";
 import boardRoutes from "./routes/boardRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
-import {
-  client,
-  httpRequests,
-  requestDuration,
-} from "./metrics.js";
+
 
 dotenv.config();
 
@@ -20,11 +16,17 @@ const app = express();
 
 
 // ✅ CORS CONFIG (Netlify + Localhost)
+
 const allowedOrigins = [
   "http://localhost",
   "http://localhost:3000",
+
   "http://13.63.159.167",
   "https://13.63.159.167",
+
+  "http://16.171.114.23",
+  "https://16.171.114.23",
+
   "https://trello-clone18.netlify.app"
 ];
 
@@ -44,25 +46,6 @@ app.use(cors({
 // ✅ Middleware
 app.use(express.json());
 
-app.use((req, res, next) => {
-  const end = requestDuration.startTimer();
-
-  res.on("finish", () => {
-    httpRequests.inc({
-      method: req.method,
-      route: req.route?.path || req.path,
-      status: res.statusCode,
-    });
-
-    end({
-      method: req.method,
-      route: req.route?.path || req.path,
-      status: res.statusCode,
-    });
-  });
-
-  next();
-});
 
 // ✅ Routes
 app.use("/api/auth", authRoutes);
@@ -91,10 +74,6 @@ const connectDB = async () => {
 
 connectDB();
 
-app.get("/metrics", async (req, res) => {
-  res.set("Content-Type", client.register.contentType);
-  res.end(await client.register.metrics());
-});
 
 // ✅ Server Start (IMPORTANT FOR RENDER)
 const PORT = process.env.PORT || 5000;
